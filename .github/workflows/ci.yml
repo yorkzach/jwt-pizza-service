@@ -41,7 +41,7 @@ jobs:
         run: npm run lint
 
       - name: Tests
-        run: npm test
+        run: npm tests
 
       - name: Write config file
         run: |
