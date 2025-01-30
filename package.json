@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cd src && node index.js",
     "lint" : "eslint src",
-    "tests" : "jest --coverage"
+    "test" : "jest --coverage"
   },
   "license": "MIT",
   "dependencies": {
@@ -18,7 +18,8 @@
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "eslint": "^9.19.0",
-    "globals": "^15.14.0"
+    "globals": "^15.14.0",
+    "jest": "^29.0.0"
   },
   "keywords": [],
   "author": ""
