@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('./service');
+const app = require('../src/service');
 
 describe('Service API Tests', () => {
   describe('GET /', () => {
