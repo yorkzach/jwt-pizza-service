@@ -6,7 +6,8 @@
   "scripts": {
     "start": "cd src && node index.js",
     "lint": "eslint src",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "clear-jest-cache": "jest --clearCache"
   },
   "license": "MIT",
   "dependencies": {
