@@ -6,7 +6,7 @@ jest.mock('mysql2/promise');
 jest.mock('jsonwebtoken');
 const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
-const { DB } = require('../src/database/database');
+const { DB } = require('../src/database/database'); // DB here is presumed to be an instance, not a class.
 
 describe('Service API Tests', () => {
   describe('GET /', () => {
@@ -70,7 +70,8 @@ describe('Database Operations', () => {
       end: jest.fn(),
     };
     mysql.createConnection.mockResolvedValue(mockConnection);
-    await new DB().initialized; // Assuming 'initialized' is the promise from the constructor
+    // No new DB().initialized since DB is not a constructor
+    // Possible setup actions here, if any
   });
 
   afterEach(() => {
@@ -80,21 +81,20 @@ describe('Database Operations', () => {
   describe('getMenu', () => {
     it('should fetch menu items from the database', async () => {
       mockConnection.execute.mockResolvedValue([[{ id: 1, title: 'Pizza', description: 'Delicious pizza', image: 'image-url', price: 10 }], []]);
-
-      const db = new DB();
-      const menu = await db.getMenu();
+    
+      const menu = await DB.getMenu();
       expect(menu).toEqual([{ id: 1, title: 'Pizza', description: 'Delicious pizza', image: 'image-url', price: 10 }]);
-      expect(mockConnection.execute).toHaveBeenCalledWith('SELECT * FROM menu');
-    });
+      // Correct the expected parameters to include the undefined that is being passed
+      expect(mockConnection.execute).toHaveBeenCalledWith('SELECT * FROM menu', undefined);
+    });    
   });
 
   describe('addMenuItem', () => {
     it('should add a menu item to the database', async () => {
       mockConnection.execute.mockResolvedValue([{ insertId: 2 }, []]);
 
-      const db = new DB();
       const newItem = { title: 'Burger', description: 'Juicy burger', image: 'burger-img', price: 15 };
-      const result = await db.addMenuItem(newItem);
+      const result = await DB.addMenuItem(newItem);
       expect(result).toEqual({ ...newItem, id: 2 });
       expect(mockConnection.execute).toHaveBeenCalledWith('INSERT INTO menu (title, description, image, price) VALUES (?, ?, ?, ?)', ['Burger', 'Juicy burger', 'burger-img', 15]);
     });
