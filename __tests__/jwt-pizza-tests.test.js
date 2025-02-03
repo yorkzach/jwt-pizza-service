@@ -1,5 +1,12 @@
 const request = require('supertest');
-const app = require('../src/service');
+const app = require('../src/service'); // Ensure this module properly exports the Express app
+
+// Jest Mocks for MySQL and JWT before they are used
+jest.mock('mysql2/promise');
+jest.mock('jsonwebtoken');
+const mysql = require('mysql2/promise');
+const jwt = require('jsonwebtoken');
+const { DB } = require('../src/database/database');
 
 describe('Service API Tests', () => {
   describe('GET /', () => {
@@ -21,17 +28,17 @@ describe('Service API Tests', () => {
     });
 
     it('should allow access to the /api/auth route', async () => {
-      const res = await request(app).get('/api/auth');  // Adjust according to actual endpoint usage
-      expect(res.statusCode).toBeLessThan(500);  // Assumes endpoint exists and is handled
+      const res = await request(app).get('/api/auth');
+      expect(res.statusCode).toBeLessThan(500);
     });
 
     it('should allow access to the /api/order route', async () => {
-      const res = await request(app).get('/api/order');  // Adjust according to actual endpoint usage
+      const res = await request(app).get('/api/order');
       expect(res.statusCode).toBeLessThan(500);
     });
 
     it('should allow access to the /api/franchise route', async () => {
-      const res = await request(app).get('/api/franchise');  // Adjust according to actual endpoint usage
+      const res = await request(app).get('/api/franchise');
       expect(res.statusCode).toBeLessThanOrEqual(500);
     });
   });
@@ -44,64 +51,52 @@ describe('Service API Tests', () => {
     });
   });
 
-//   describe('Error Handling', () => {
-//     it('should handle errors gracefully', async () => {
-//       // You might need to mock an error scenario, depending on your implementation
-//       // For example, forcing an error in a middleware or route to see if it's caught and handled properly
-//       const res = await request(app).get('/api/error');  // Hypothetical endpoint that would trigger an error
-//       expect(res.statusCode).toEqual(404);
-//       expect(res.body).toHaveProperty('message');
-//       expect(res.body).toHaveProperty('stack');
-//     });
-//   });
+  describe('Error Handling', () => {
+    it('should handle errors gracefully', async () => {
+      const res = await request(app).get('/api/error'); // Make sure your application has this endpoint configured to simulate an error
+      expect(res.statusCode).toEqual(404);
+      expect(res.body).toHaveProperty('message');
+    });
+  });
 });
 
-// jest.mock('mysql2/promise');
-// const mysql = require('mysql2/promise');
-// const { DB } = require('../src/database/database');
-// const sinon = require('sinon');
+describe('Database Operations', () => {
+  let mockConnection;
 
-// describe('Database Operations', () => {
-//   let db;
-//   let mockConnection;
+  beforeEach(async () => {
+    mockConnection = {
+      execute: jest.fn(),
+      query: jest.fn(),
+      end: jest.fn(),
+    };
+    mysql.createConnection.mockResolvedValue(mockConnection);
+    await new DB().initialized; // Assuming 'initialized' is the promise from the constructor
+  });
 
-//   beforeEach(async () => {
-//     mockConnection = {
-//       execute: jest.fn(),
-//       query: jest.fn(),
-//       end: jest.fn(),
-//     };
-//     mysql.createConnection.mockResolvedValue(mockConnection);
-//     db = new DB();
-//     await db.initialized;  // Wait for the DB initialization if necessary
-//   });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-//   afterEach(() => {
-//     jest.clearAllMocks();
-//   });
+  describe('getMenu', () => {
+    it('should fetch menu items from the database', async () => {
+      mockConnection.execute.mockResolvedValue([[{ id: 1, title: 'Pizza', description: 'Delicious pizza', image: 'image-url', price: 10 }], []]);
 
-//   describe('getMenu', () => {
-//     it('should fetch menu items from the database', async () => {
-//       mockConnection.execute.mockResolvedValue([[{ id: 1, title: 'Pizza', description: 'Delicious pizza', image: 'image-url', price: 10 }], []]);
+      const db = new DB();
+      const menu = await db.getMenu();
+      expect(menu).toEqual([{ id: 1, title: 'Pizza', description: 'Delicious pizza', image: 'image-url', price: 10 }]);
+      expect(mockConnection.execute).toHaveBeenCalledWith('SELECT * FROM menu');
+    });
+  });
 
-//       const menu = await db.getMenu();
-//       expect(menu).toEqual([{ id: 1, title: 'Pizza', description: 'Delicious pizza', image: 'image-url', price: 10 }]);
-//       expect(mockConnection.execute).toHaveBeenCalledWith('SELECT * FROM menu');
-//     });
-//   });
+  describe('addMenuItem', () => {
+    it('should add a menu item to the database', async () => {
+      mockConnection.execute.mockResolvedValue([{ insertId: 2 }, []]);
 
-//   describe('addMenuItem', () => {
-//     it('should add a menu item to the database', async () => {
-//       const newItem = { title: 'Burger', description: 'Juicy burger', image: 'burger-img', price: 15 };
-//       mockConnection.execute.mockResolvedValue([{ insertId: 2 }, []]);
-
-//       const result = await db.addMenuItem(newItem);
-//       expect(result).toEqual({ ...newItem, id: 2 });
-//       expect(mockConnection.execute).toHaveBeenCalledWith('INSERT INTO menu (title, description, image, price) VALUES (?, ?, ?, ?)', ['Burger', 'Juicy burger', 'burger-img', 15]);
-//     });
-//   });
-
-  // Additional tests for other methods like addUser, getUser, updateUser, etc.
-// });
-
-
+      const db = new DB();
+      const newItem = { title: 'Burger', description: 'Juicy burger', image: 'burger-img', price: 15 };
+      const result = await db.addMenuItem(newItem);
+      expect(result).toEqual({ ...newItem, id: 2 });
+      expect(mockConnection.execute).toHaveBeenCalledWith('INSERT INTO menu (title, description, image, price) VALUES (?, ?, ?, ?)', ['Burger', 'Juicy burger', 'burger-img', 15]);
+    });
+  });
+});
