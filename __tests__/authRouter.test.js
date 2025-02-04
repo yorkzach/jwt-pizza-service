@@ -1,11 +1,11 @@
 const request = require('supertest');
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { DB, Role } = require('../database/database');  // Adjust the path as necessary
-const config = require('../config');
-const { authRouter, setAuthUser } = require('./authRouter');  // Adjust the path as necessary
+const { DB, Role } = require('../src/database/database');  // Adjust the path as necessary
+const config = require('../src/config');
+const { authRouter, setAuthUser } = require('../src/routes/authRouter');  // Adjust the path as necessary
 
-jest.mock('../database/database', () => ({
+jest.mock('../src/database/database', () => ({
   DB: {
     addUser: jest.fn(),
     getUser: jest.fn(),
