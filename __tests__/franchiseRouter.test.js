@@ -49,7 +49,7 @@ describe('Franchise CRUD testing', () => {
 	test('get franchises', async () => {
 		const res = await request(app).get('/api/franchise').set('Authorization', `Bearer ${adminUserAuthToken}`)
 		expect(res.status).toBe(200)
-		expect(res.body[0].name).toBe('pizzaPocket')
+		expect(res.body[0].name).toBe('test franchise 4dfs')
 	})
 	test('get user franchises', async () => {
 		const res = await request(app).get(`/api/franchise/${adID}`).set('Authorization', `Bearer ${adminUserAuthToken}`)
