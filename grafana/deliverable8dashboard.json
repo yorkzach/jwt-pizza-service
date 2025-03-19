@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 15,
+  "id": 22,
   "links": [],
   "panels": [
     {
@@ -757,7 +757,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Pizza Dashboard",
+  "title": "York Pizza Dashboard",
   "uid": "feg8mabsom2v4a",
-  "version": 23
+  "version": 1
 }
